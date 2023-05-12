@@ -24,20 +24,13 @@ SDL_Rect time_rect;
 SDL_Rect time_dest_rect;
 
 
-// left hold
-vector<string> leftHold_paths = { "../src/downHold.png", "../src/leftHold.png", "../src/rightHold.png", "../src/upHold.png" };
-vector<SDL_Surface*> leftHold_surfaces;
-vector<SDL_Texture*> leftHold_textures;
-vector<SDL_Rect> leftHold_rects;
-vector<SDL_Rect> leftHold_dest_rects;
+// hold
+vector<string> hold_paths = { "../src/downHold.png", "../src/leftHold.png", "../src/rightHold.png", "../src/upHold.png" };
+vector<SDL_Surface*> hold_surfaces;
+vector<SDL_Texture*> hold_textures;
+vector<SDL_Rect> hold_rects;
+vector<SDL_Rect> hold_dest_rects;
 int leftHoldY = 475;
-
-// right hold
-vector<string> rightHold_paths = { "../src/downHold.png", "../src/leftHold.png", "../src/rightHold.png", "../src/upHold.png" };
-vector<SDL_Surface*> rightHold_surfaces;
-vector<SDL_Texture*> rightHold_textures;
-vector<SDL_Rect> rightHold_rects;
-vector<SDL_Rect> rightHold_dest_rects;
 int rightHoldY = 400;
 
 // leftUser
@@ -52,24 +45,27 @@ SDL_Texture* rightUser_texture;
 SDL_Rect rightUser_rect;
 SDL_Rect rightUser_dest_rect;
 
+
+bool isLeftUser = true;
+
 Mode1::Mode1() {
 	g_flag_running = true;
 
-	// ë°°ê²½ ì´ë¯¸ì§€ ë¡œë“œ
+	// ¹è°æ ÀÌ¹ÌÁö ·Îµå
 	bg_surface = IMG_Load("../src/bg_mode1.png");
-	bg_texture = SDL_CreateTextureFromSurface(g_renderer, bg_surface); // GPUë¡œ ì˜®ê¸°ê¸° 
+	bg_texture = SDL_CreateTextureFromSurface(g_renderer, bg_surface); // GPU·Î ¿Å±â±â 
 	SDL_FreeSurface(bg_surface);
 	bg_rect = {0, 1900, 800, 600};
 	bg_dest_rect = {0, 0, 800, 600};
 
-	// wall ì´ë¯¸ì§€ ë¡œë“œ
+	// wall ÀÌ¹ÌÁö ·Îµå
 	wall_surface = IMG_Load("../src/wall_mode1.png");
 	wall_texture = SDL_CreateTextureFromSurface(g_renderer, wall_surface); 
 	SDL_FreeSurface(wall_surface);
 	wall_rect = { 0, 1900, 400, 600 };
 	wall_dest_rect = { 200, 0, 400, 600	};
 
-	// time ì´ë¯¸ì§€ ë¡œë“œ
+	// time ÀÌ¹ÌÁö ·Îµå
 	time_surface = IMG_Load("../src/time.png");
 	time_texture = SDL_CreateTextureFromSurface(g_renderer, time_surface); 
 	SDL_FreeSurface(time_surface);
@@ -77,36 +73,28 @@ Mode1::Mode1() {
 	time_dest_rect = { 630, 10, time_surface->w, time_surface->h };
 
 
-	// left hold ì´ë¯¸ì§€ ë¡œë“œ
-	srand((unsigned)time(NULL)); // srandëŠ” í•œ ë²ˆë§Œ í˜¸ì¶œí•´ì•¼ í•©ë‹ˆë‹¤.
-	for (int i = 0; i < 20; i++) {
-		int random_hold_idx = rand() % 4; // 0~3 ì¤‘ í•˜ë‚˜ì˜ ì¸ë±ìŠ¤ë¥¼ ë¬´ì‘ìœ„ë¡œ ì„ íƒ
-		string hold_path = leftHold_paths[random_hold_idx];
+	// hold ÀÌ¹ÌÁö ·Îµå
+	srand((unsigned)time(NULL)); // srand´Â ÇÑ ¹ø¸¸ È£ÃâÇØ¾ß ÇÕ´Ï´Ù.
+	for (int i = 0; i < 40; i++) {
+		int random_hold_idx = rand() % 4; // 0~3 Áß ÇÏ³ªÀÇ ÀÎµ¦½º¸¦ ¹«ÀÛÀ§·Î ¼±ÅÃ
+		string hold_path = hold_paths[random_hold_idx];
 		SDL_Surface* hold_surface = IMG_Load(hold_path.c_str());
 		SDL_Texture* hold_texture = SDL_CreateTextureFromSurface(g_renderer, hold_surface);
 		SDL_FreeSurface(hold_surface);
-		leftHold_surfaces.push_back(hold_surface);
-		leftHold_textures.push_back(hold_texture);
+		hold_surfaces.push_back(hold_surface);
+		hold_textures.push_back(hold_texture);
 		SDL_Rect hold_rect = { 0, 0, hold_surface->w, hold_surface->h };
-		leftHold_rects.push_back(hold_rect);
-		SDL_Rect hold_dest_rect = { 270, leftHoldY , hold_surface->w, hold_surface->h };
-		leftHold_dest_rects.push_back(hold_dest_rect);
-		leftHoldY -= 150;
-	}
-	// right hold ì´ë¯¸ì§€
-	for (int i = 0; i < 20; i++) {
-		int random_hold_idx = rand() % 4; // 0~3 ì¤‘ í•˜ë‚˜ì˜ ì¸ë±ìŠ¤ë¥¼ ë¬´ì‘ìœ„ë¡œ ì„ íƒ
-		string hold_path = rightHold_paths[random_hold_idx];
-		SDL_Surface* hold_surface = IMG_Load(hold_path.c_str());
-		SDL_Texture* hold_texture = SDL_CreateTextureFromSurface(g_renderer, hold_surface);
-		SDL_FreeSurface(hold_surface);
-		rightHold_surfaces.push_back(hold_surface);
-		rightHold_textures.push_back(hold_texture);
-		SDL_Rect hold_rect = { 0, 0, hold_surface->w, hold_surface->h };
-		rightHold_rects.push_back(hold_rect);
-		SDL_Rect hold_dest_rect = { 470, rightHoldY , hold_surface->w, hold_surface->h };
-		rightHold_dest_rects.push_back(hold_dest_rect);
-		rightHoldY -= 150;
+		hold_rects.push_back(hold_rect);
+		if (i % 2 == 0) {
+			SDL_Rect hold_dest_rect = { 270, leftHoldY , hold_surface->w, hold_surface->h };
+			hold_dest_rects.push_back(hold_dest_rect);
+			leftHoldY -= 150;
+		}
+		else {
+			SDL_Rect hold_dest_rect = { 470, rightHoldY , hold_surface->w, hold_surface->h };
+			hold_dest_rects.push_back(hold_dest_rect);
+			rightHoldY -= 150;
+		}
 	}
 
 	// leftUser
@@ -114,29 +102,29 @@ Mode1::Mode1() {
 	leftUser_texture = SDL_CreateTextureFromSurface(g_renderer, leftUser_surface);
 	SDL_FreeSurface(leftUser_surface);
 	leftUser_rect = { 0, 0, leftUser_surface->w, leftUser_surface->h };
-	leftUser_dest_rect = { 240, 400, leftUser_surface->w, leftUser_surface->h };
+	leftUser_dest_rect = { 240, 427, leftUser_surface->w, leftUser_surface->h };
 
 	// rightUser
 	rightUser_surface = IMG_Load("../src/rightUser.png");
 	rightUser_texture = SDL_CreateTextureFromSurface(g_renderer, rightUser_surface);
 	SDL_FreeSurface(rightUser_surface);
 	rightUser_rect = { 0, 0, rightUser_surface->w, rightUser_surface->h };
-	rightUser_dest_rect = { 440, 400, rightUser_surface->w, rightUser_surface->h };
+	rightUser_dest_rect = { 440, 427, rightUser_surface->w, rightUser_surface->h };
+	
+
 }
 
 Mode1::~Mode1() {
 	SDL_DestroyTexture(bg_texture);
 	SDL_DestroyTexture(wall_texture);
 	SDL_DestroyTexture(time_texture);
-	//SDL_DestroyTexture(hold_texture);
-	for (SDL_Texture* texture : leftHold_textures) {
-		SDL_DestroyTexture(texture);
-	}
-	for (SDL_Texture* texture : rightHold_textures) {
+	
+	for (SDL_Texture* texture : hold_textures) {
 		SDL_DestroyTexture(texture);
 	}
 	SDL_DestroyTexture(leftUser_texture);
 	SDL_DestroyTexture(rightUser_texture);
+
 }
 
 void Mode1::Update()
@@ -152,20 +140,46 @@ void Mode1::Render() {
 	SDL_RenderCopy(g_renderer, time_texture, &time_rect, &time_dest_rect);
 
 	SDL_RenderCopy(g_renderer, leftUser_texture, &leftUser_rect, &leftUser_dest_rect);
-	SDL_RenderCopy(g_renderer, rightUser_texture, &rightUser_rect, &rightUser_dest_rect);
-	// SDL_RenderCopy(g_renderer, hold_texture, &hold_rect, &hold_dest_rect);
-	for (size_t i = 0; i < leftHold_textures.size(); i++) {
-		SDL_RenderCopy(g_renderer, leftHold_textures[i], &leftHold_rects[i], &leftHold_dest_rects[i]);
-	}
-
-	for (size_t i = 0; i < rightHold_textures.size(); i++) {
-		SDL_RenderCopy(g_renderer, rightHold_textures[i], &rightHold_rects[i], &rightHold_dest_rects[i]);
+	// SDL_RenderCopy(g_renderer, rightUser_texture, &rightUser_rect, &rightUser_dest_rect);
+	
+	for (size_t i = 0; i < hold_textures.size(); i++) {
+		SDL_RenderCopy(g_renderer, hold_textures[i], &hold_rects[i], &hold_dest_rects[i]);
 	}
 
 	SDL_RenderPresent(g_renderer);
 }
 
+void Mode1::userMove() {
+	wall_dest_rect.y += 30;
+	bg_dest_rect.y += 5;
+	if (isLeftUser) {
+		leftUser_dest_rect.x += 200;
+		rightUser_dest_rect.x -= 200;
+	}
+	else {
+		leftUser_dest_rect.x -= 200;
+		rightUser_dest_rect.x += 200;
+	}
+	SDL_Surface* tempSurface = leftUser_surface;
+	leftUser_surface = rightUser_surface;
+	rightUser_surface = tempSurface;
+
+	SDL_Texture* tempTexture = leftUser_texture;
+	leftUser_texture = rightUser_texture;
+	rightUser_texture = tempTexture;
+
+	isLeftUser = !isLeftUser;
+}
+
+void Mode1::holdMove() {
+	for (SDL_Rect& hold_dest_rect : hold_dest_rects) {
+		hold_dest_rect.y += 75;
+	}
+}
+
+
 void Mode1::HandleEvents() {
+	
 	SDL_Event event;
 	if (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -175,20 +189,28 @@ void Mode1::HandleEvents() {
 
 		case SDL_KEYDOWN:
 			if (event.key.keysym.sym == SDLK_LEFT) {
-				// ë‹¤ìŒ ëŒì´ leftHoldì¼ ë•Œ hold, wall, bg ë‚´ë ¤ê°€ê¸°
-				// ì•„ë‹Œê²½ìš° stuníš¨ê³¼?
+				// ´ÙÀ½ µ¹ÀÌ leftHoldÀÏ ¶§ hold, wall, bg ³»·Á°¡±â 
+				// ¾Æ´Ñ°æ¿ì stunÈ¿°ú?
+				userMove();
+				holdMove();
 			}
 			else if (event.key.keysym.sym == SDLK_RIGHT) {
-				// ë‹¤ìŒ ëŒì´ rightHoldì¼ ë•Œ hold, wall, bg ë‚´ë ¤ê°€ê¸°
-				// ì•„ë‹Œê²½ìš° stuníš¨ê³¼?
+				// ´ÙÀ½ µ¹ÀÌ rightHoldÀÏ ¶§ hold, wall, bg ³»·Á°¡±â
+				// ¾Æ´Ñ°æ¿ì stunÈ¿°ú?
+				userMove();
+				holdMove();
 			}
 			else if (event.key.keysym.sym == SDLK_UP) {
-				// ë‹¤ìŒ ëŒì´ upHoldì¼ ë•Œ hold, wall, bg ë‚´ë ¤ê°€ê¸°
-				// ì•„ë‹Œê²½ìš° stuníš¨ê³¼?
+				// ´ÙÀ½ µ¹ÀÌ upHoldÀÏ ¶§ hold, wall, bg ³»·Á°¡±â
+				// ¾Æ´Ñ°æ¿ì stunÈ¿°ú?
+				userMove();
+				holdMove();
 			}
 			else if (event.key.keysym.sym == SDLK_DOWN) {
-				// ë‹¤ìŒ ëŒì´ downHoldì¼ ë•Œ hold, wall, bg ë‚´ë ¤ê°€ê¸°
-				// ì•„ë‹Œê²½ìš° stuníš¨ê³¼?
+				// ´ÙÀ½ µ¹ÀÌ downHoldÀÏ ¶§ hold, wall, bg ³»·Á°¡±â
+				// ¾Æ´Ñ°æ¿ì stunÈ¿°ú?
+				userMove();
+				holdMove();
 			}
 			break;
 		
@@ -196,4 +218,5 @@ void Mode1::HandleEvents() {
 			break;
 		}
 	}
+
 }
